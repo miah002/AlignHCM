@@ -402,9 +402,9 @@ Logic  : One pass per GL account type.
          Pass 1 = Debits  (vGLAcctType = 'D') -> drvDebit  populated, drvCredit = '0.00'
          Pass 2 = Credits (vGLAcctType = 'C') -> drvCredit populated, drvDebit  = '0.00'
 
-         Reversal entries keep their negative sign (no ABS).  Total debits
-         and total credits across the file therefore balance because the
-         underlying TmpAlloc rows are paired by the UKG GL engine.
+         Credit amounts in TmpAlloc are stored as negatives; ABS is applied
+         so Oracle Fusion receives positive values in the Entered Credit
+         Amount column as required by the GL_INTERFACE import spec.
 
 Filters: vGLBaseSeg <> 'NOGL' (per LLBC requirement)
          PerControl range and COID list come from U_dsi_Parameters / AscExp.
@@ -543,7 +543,7 @@ SELECT
     ,LTRIM(RTRIM(ISNULL(vGLBaseSeg, '')))
     ,LTRIM(RTRIM(ISNULL(vLocationSeg, '')))
     ,'0.00'
-    ,CONVERT(varchar(20), CAST(SUM(vAllocAmt) AS decimal(18,2)))  -- consistent typing
+    ,CONVERT(varchar(20), CAST(ABS(SUM(vAllocAmt)) AS decimal(18,2)))
     ,'UKG Payroll - ' + CONVERT(varchar(6), CAST(LEFT(vPerControl, 8) AS DATE), 112)
     ,'UKG Payroll Journal - ' + CONVERT(varchar(6), CAST(LEFT(vPerControl, 8) AS DATE), 112)
 FROM dbo.vw_Dsi_TmpAlloc WITH (NOLOCK)
