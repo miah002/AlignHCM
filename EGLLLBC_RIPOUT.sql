@@ -1,35 +1,20 @@
 /**********************************************************************************
 
-EGLLLBC: Lac La Biche County - Oracle Fusion GL Interface Export
+EGLLLBC: LLBC Oracle Fusion GL Interface Export
 
 FormatCode:     EGLLLBC
-Project:        Oracle Fusion GL Interface Export
-Client:         Lac La Biche County (LLBC)
-Vendor System:  Oracle Fusion (GL_INTERFACE)
-Output File:    GlInterface.csv  (no header row, comma-delimited)
-Source Table:   dbo.TmpAlloc (via dbo.vw_Dsi_TmpAlloc)
+Project:        LLBC Oracle Fusion GL Interface Export
+Client ID:      LAC5100
+Date/time:      2026-04-27 10:43:12.723
 Ripout version: 7.4
 Export Type:    Web
-
-Adapted from EGLORACSIM ripout. Customizations:
-  - No header row (per Oracle Fusion spec - first row must be data)
-  - 160 output columns covering full Oracle Fusion GL Interface spec
-  - LLBC-specific COID -> Segment1 mapping ('LLBC'='01','LLBCF'='02')
-  - Direct segment fields (OrgLvl2Seg, GLBaseSeg, LocationSeg) - no GL mask parsing
-  - Reversal entries preserve negative signs (no ABS)
-  - Dynamic REFERENCE values include current month/year (MMYYYY)
-
-Filters:
-  - Exclude rows where GLBaseSeg = 'NOGL'
-  - PerControl range from U_dsi_Parameters (set by AscExp)
-  - COID list from AscExp (expCOID / expCOIDList)
-
-Notes:
-  - Segment2 (Department) is currently OrgLvl2Seg as-is.  Replace with a
-    CASE statement when the Oracle dept code mapping is provided.
-  - The total column list resolves to 160 columns end-to-end based on
-    the published Oracle Fusion GL Interface field set; trim or extend
-    here if the client confirms a different column count.
+Status:         Testing
+Environment:    tw15
+Server:         tw1wup5db03
+Database:       ULTIPRO_WPLLBC
+Web Filename:   LAC5100_ZA15G_EEHISTORY_EGLLLBC_ExportCode_YYYYMMDD_HHMMSS.txt
+ExportPath:    
+TestPath:      
 
 **********************************************************************************/
 
@@ -88,7 +73,7 @@ AND CfgName LIKE '%path%'
 -- Add AscExp expSystemIDs to U_dsi_RipoutParms
 -----------
 
-INSERT INTO dbo.U_dsi_RipoutParms (rpoFormatCode, rpoParmType, rpoParmValue01, rpoParmValue02)
+INSERT INTO dbo.U_dsi_RipoutParms (rpoFormatCode, rpoParmType, rpoParmValue01, rpoParmValue02) 
 SELECT
 
 ExpFormatCode,
@@ -125,7 +110,7 @@ IF OBJECT_ID('dsi_vwEGLLLBC_Export') IS NOT NULL DROP VIEW [dbo].[dsi_vwEGLLLBC_
 GO
 IF OBJECT_ID('dsi_sp_BuildDriverTables_EGLLLBC') IS NOT NULL DROP PROCEDURE [dbo].[dsi_sp_BuildDriverTables_EGLLLBC];
 GO
-IF OBJECT_ID('U_EGLLLBC_File')   IS NOT NULL DROP TABLE [dbo].[U_EGLLLBC_File];
+IF OBJECT_ID('U_EGLLLBC_File') IS NOT NULL DROP TABLE [dbo].[U_EGLLLBC_File];
 GO
 IF OBJECT_ID('U_EGLLLBC_EEList') IS NOT NULL DROP TABLE [dbo].[U_EGLLLBC_EEList];
 GO
@@ -134,15 +119,12 @@ GO
 
 -----------
 -- AscDefH inserts
--- AdhFileFormat='CDE'   = comma-delimited export
--- AdhAuditStaticFields  = retained from template; does not control header output
--- HEADER ROW SUPPRESSION: omit all AscDefF records with AdfRecType = 'H'
 -----------
 
 INSERT INTO [dbo].[AscDefH] (AdhAccrCodesUsed,AdhAggregateAtLevel,AdhAuditStaticFields,AdhChildTable,AdhClientTableList,AdhCustomDLLFileName,AdhDedCodesUsed,AdhDelimiter,AdhEarnCodesUsed,AdhEEIdentifier,AdhEndOfRecord,AdhEngine,AdhFileFormat,AdhFormatCode,AdhFormatName,AdhFundCodesUsed,AdhImportExport,AdhInputFormName,AdhIsAuditFormat,AdhIsSQLExport,AdhModifyStamp,AdhOutputMediaType,AdhRecordSize,AdhSortBy,AdhSysFormat,AdhSystemID,AdhTaxCodesUsed,AdhYearStartFixedDate,AdhYearStartOption,AdhPreProcessSQL,AdhRespectZeroPayRate,AdhCreateTClockBatches,AdhThirdPartyPay) VALUES ('N','C','Y','0','','','N','','N','','013010','EMPEXPORT','CDE','EGLLLBC','LLBC Oracle Fusion GL Interface Export','N','E','FORM_EMPEXPORT','N','C',dbo.fn_GetTimedKey(),'D','8000','S','N','EGLLLBCZ0','N','Jan  1 1900 12:00AM','C','dbo.dsi_sp_Switchbox_v2','N',NULL,'N');
 
 -----------
--- AscDefF inserts -- DATA records only (no header row per Oracle Fusion spec)
+-- AscDefF inserts
 -----------
 
 INSERT INTO [dbo].[AscDefF] (AdfFieldNumber,AdfHeaderSystemID,AdfLen,AdfRecType,AdfSetNumber,AdfStartPos,AdfTableName,AdfTargetField,AdfVariableName,AdfVariableType,AdfExpression,AdfForCond) VALUES ('1','EGLLLBCZ0','500','D','10','1',NULL,'Status Code',NULL,NULL,'"NEW"','(''DA''=''T,'')');
@@ -306,31 +288,23 @@ INSERT INTO [dbo].[AscDefF] (AdfFieldNumber,AdfHeaderSystemID,AdfLen,AdfRecType,
 INSERT INTO [dbo].[AscDefF] (AdfFieldNumber,AdfHeaderSystemID,AdfLen,AdfRecType,AdfSetNumber,AdfStartPos,AdfTableName,AdfTargetField,AdfVariableName,AdfVariableType,AdfExpression,AdfForCond) VALUES ('159','EGLLLBCZ0','500','D','10','159',NULL,'Global Attribute Number 5',NULL,NULL,'""','(''DA''=''T,'')');
 INSERT INTO [dbo].[AscDefF] (AdfFieldNumber,AdfHeaderSystemID,AdfLen,AdfRecType,AdfSetNumber,AdfStartPos,AdfTableName,AdfTargetField,AdfVariableName,AdfVariableType,AdfExpression,AdfForCond) VALUES ('160','EGLLLBCZ0','500','D','10','160',NULL,'END',NULL,NULL,'"END"','(''DA''=''T'')');
 
--- Total columns generated: 160
-
 -----------
 -- Build web filename
--- Output filename per Oracle Fusion vendor spec: GlInterface.csv
 -----------
 
-/*01*/ DECLARE @COUNTRY char(2) = (SELECT CASE WHEN LEFT(@@SERVERNAME, 1) = 'T' THEN 'ca' ELSE 'us' END);
-/*02*/ DECLARE @SERVER varchar(6) = (SELECT CASE WHEN LEFT(@@SERVERNAME, 3) IN ('WP1','WP2','WP3','WP4','WP5') THEN 'WP' WHEN LEFT(@@SERVERNAME, 2) IN ('NW','EW','WP') THEN LEFT(@@SERVERNAME, 3) ELSE LEFT(@@SERVERNAME, 2) END);
-/*03*/ SET @SERVER = CASE WHEN LEFT(@@SERVERNAME, 2) IN ('NZ','EZ') THEN @SERVER + '\' + LEFT(@@SERVERNAME, 3) ELSE @SERVER END;
-/*04*/ DECLARE @UDARNUM varchar(10) = (SELECT LTRIM(RTRIM(CmmContractNo)) FROM dbo.CompMast);
-/*05*/ DECLARE @ENVIRONMENT varchar(7) = (SELECT CASE WHEN SUBSTRING(@@SERVERNAME,3,1) = 'D' THEN @UDARNUM WHEN SUBSTRING(@@SERVERNAME,4,1) = 'D' THEN LEFT(@@SERVERNAME,3) + 'Z' ELSE RTRIM(LEFT(@@SERVERNAME,PATINDEX('%[0-9]%',@@SERVERNAME)) + SUBSTRING(@@SERVERNAME,PATINDEX('%UP[0-9]%',@@SERVERNAME)+2,1)) END);
-/*06*/ SET @ENVIRONMENT = CASE WHEN @ENVIRONMENT = 'EW21' THEN 'WP6' WHEN @ENVIRONMENT = 'EW22' THEN 'WP7' ELSE @ENVIRONMENT END;
-/*07*/ DECLARE @COCODE varchar(5) = (SELECT RTRIM(CmmCompanyCode) FROM dbo.CompMast);
-/*08*/ DECLARE @FileName varchar(1000) = 'GlInterface.csv';
-/*09*/ DECLARE @FilePath varchar(1000) = '\\' + @COUNTRY + '.saas\' + @SERVER + '\' + @ENVIRONMENT + '\Downloads\V10\Exports\' + @COCODE + '\EmployeeHistoryExport\';
+/*01*/ DECLARE @FileURI varchar(255) = (SELECT stlvalue FROM dbo.vw_RbsSiteValues WHERE stlCode = 'FILEURI');
+/*02*/ IF RIGHT(RTRIM(@FileURI),1) <> '\' AND LEN(@FileURI) > 1 SET @FileURI = RTRIM(@FileURI) + '\';
+/*03*/ DECLARE @COCODE varchar(5) = (SELECT RTRIM(CmmCompanyCode) FROM dbo.CompMast);
+/*04*/ DECLARE @FileName varchar(1000) = 'EGLLLBC_20260427.txt';
+/*05*/ DECLARE @FilePath varchar(1000) = @FileURI + 'Exports\' + @COCODE + '\EmployeeHistoryExport\';
 
 -----------
 -- AscExp inserts
--- Replace expCOIDList with the COID system IDs for LLBC and LLBCF when known.
 -----------
 
-INSERT INTO [dbo].[AscExp] (expAscFileName,expAsOfDate,expCOID,expCOIDAllCompanies,expCOIDList,expDateOrPerControl,expDateTimeRangeEnd,expDateTimeRangeStart,expDesc,expEndPerControl,expEngine,expExportCode,expExported,expFormatCode,expGLCodeTypes,expGLCodeTypesAll,expGroupBy,expLastEndPerControl,expLastPayDate,expLastPeriodEndDate,expLastStartPerControl,expNoOfRecords,expSelectByField,expSelectByList,expStartPerControl,expSystemID,expTaxCalcGroupID,expUser,expIEXSystemID) VALUES (RTRIM(@FilePath) + LTRIM(RTRIM(@FileName)),NULL,'','','',NULL,NULL,NULL,'LLBC Oracle Fusion GL - Production','202604269','EMPEXPORT','EORACLEGL',NULL,'EGLLLBC',NULL,NULL,NULL,'202604011','Apr 26 2026 12:00AM','Apr 26 2026 12:00AM','202604011',NULL,'','','202604011',dbo.fn_GetTimedKey(),NULL,'ULTI',NULL);
-INSERT INTO [dbo].[AscExp] (expAscFileName,expAsOfDate,expCOID,expCOIDAllCompanies,expCOIDList,expDateOrPerControl,expDateTimeRangeEnd,expDateTimeRangeStart,expDesc,expEndPerControl,expEngine,expExportCode,expExported,expFormatCode,expGLCodeTypes,expGLCodeTypesAll,expGroupBy,expLastEndPerControl,expLastPayDate,expLastPeriodEndDate,expLastStartPerControl,expNoOfRecords,expSelectByField,expSelectByList,expStartPerControl,expSystemID,expTaxCalcGroupID,expUser,expIEXSystemID) VALUES (RTRIM(@FilePath) + LTRIM(RTRIM(@FileName)),NULL,'','','',NULL,NULL,NULL,'LLBC Oracle Fusion GL - Test','202604269','EMPEXPORT','TESTGL',NULL,'EGLLLBC',NULL,NULL,NULL,'202604011','Apr 26 2026 12:00AM','Apr 26 2026 12:00AM','202604011',NULL,'','','202604011',dbo.fn_GetTimedKey(),NULL,'ULTI',NULL);
-INSERT INTO [dbo].[AscExp] (expAscFileName,expAsOfDate,expCOID,expCOIDAllCompanies,expCOIDList,expDateOrPerControl,expDateTimeRangeEnd,expDateTimeRangeStart,expDesc,expEndPerControl,expEngine,expExportCode,expExported,expFormatCode,expGLCodeTypes,expGLCodeTypesAll,expGroupBy,expLastEndPerControl,expLastPayDate,expLastPeriodEndDate,expLastStartPerControl,expNoOfRecords,expSelectByField,expSelectByList,expStartPerControl,expSystemID,expTaxCalcGroupID,expUser,expIEXSystemID) VALUES (RTRIM(@FilePath) + LTRIM(RTRIM(@FileName)),NULL,'','','',NULL,NULL,NULL,'LLBC Oracle Fusion GL - PerControl Range','202604269','EMPEXPORT','TESTPERC',NULL,'EGLLLBC',NULL,NULL,NULL,'202604011','Apr 26 2026 12:00AM','Apr 26 2026 12:00AM','202604011',NULL,'','','202604011',dbo.fn_GetTimedKey(),NULL,'ULTI',NULL);
+INSERT INTO [dbo].[AscExp] (expAscFileName,expAsOfDate,expCOID,expCOIDAllCompanies,expCOIDList,expDateOrPerControl,expDateTimeRangeEnd,expDateTimeRangeStart,expDesc,expEndPerControl,expEngine,expExportCode,expExported,expFormatCode,expGLCodeTypes,expGLCodeTypesAll,expGroupBy,expLastEndPerControl,expLastPayDate,expLastPeriodEndDate,expLastStartPerControl,expNoOfRecords,expSelectByField,expSelectByList,expStartPerControl,expSystemID,expTaxCalcGroupID,expUser,expIEXSystemID) VALUES (RTRIM(@FilePath) + LTRIM(RTRIM(@FileName)),NULL,'','','',NULL,NULL,NULL,'LLBC Oracle Fusion GL','202604269','EMPEXPORT','EORACLEGL',NULL,'EGLLLBC',NULL,NULL,NULL,'202604011','Apr 26 2026 12:00AM','Apr 26 2026 12:00AM','202604011',NULL,'','','202604011',dbo.fn_GetTimedKey(),NULL,'ULTI',NULL);
+INSERT INTO [dbo].[AscExp] (expAscFileName,expAsOfDate,expCOID,expCOIDAllCompanies,expCOIDList,expDateOrPerControl,expDateTimeRangeEnd,expDateTimeRangeStart,expDesc,expEndPerControl,expEngine,expExportCode,expExported,expFormatCode,expGLCodeTypes,expGLCodeTypesAll,expGroupBy,expLastEndPerControl,expLastPayDate,expLastPeriodEndDate,expLastStartPerControl,expNoOfRecords,expSelectByField,expSelectByList,expStartPerControl,expSystemID,expTaxCalcGroupID,expUser,expIEXSystemID) VALUES (RTRIM(@FilePath) + LTRIM(RTRIM(@FileName)),NULL,'','','',NULL,NULL,NULL,'LLBC Oracle Fusion GL - test','202604269','EMPEXPORT','TESTGL',NULL,'EGLLLBC',NULL,NULL,NULL,'202604011','Apr 26 2026 12:00AM','Apr 26 2026 12:00AM','202604011',NULL,'','','202604011',dbo.fn_GetTimedKey(),NULL,'ULTI',NULL);
+INSERT INTO [dbo].[AscExp] (expAscFileName,expAsOfDate,expCOID,expCOIDAllCompanies,expCOIDList,expDateOrPerControl,expDateTimeRangeEnd,expDateTimeRangeStart,expDesc,expEndPerControl,expEngine,expExportCode,expExported,expFormatCode,expGLCodeTypes,expGLCodeTypesAll,expGroupBy,expLastEndPerControl,expLastPayDate,expLastPeriodEndDate,expLastStartPerControl,expNoOfRecords,expSelectByField,expSelectByList,expStartPerControl,expSystemID,expTaxCalcGroupID,expUser,expIEXSystemID) VALUES (RTRIM(@FilePath) + LTRIM(RTRIM(@FileName)),NULL,'','','',NULL,NULL,NULL,'LLBC Oracle Fusion GL - Perc','202604269','EMPEXPORT','TESTPERC',NULL,'EGLLLBC',NULL,NULL,NULL,'202604011','Apr 26 2026 12:00AM','Apr 26 2026 12:00AM','202604011',NULL,'','','202604011',dbo.fn_GetTimedKey(),NULL,'ULTI',NULL);
 
 -----------
 -- AscImp inserts
@@ -356,7 +330,6 @@ INSERT INTO [dbo].[U_dsi_Configuration] (FormatCode,CfgName,CfgType,CfgValue) VA
 
 -----------
 -- U_dsi_SQLClauses inserts
--- No H01 record because no header row is emitted.
 -----------
 
 INSERT INTO [dbo].[U_dsi_SQLClauses] (FormatCode,RecordSet,FromClause,WhereClause) VALUES ('EGLLLBC','D10','dbo.U_EGLLLBC_drvTbl',NULL);
@@ -373,23 +346,20 @@ INSERT INTO [dbo].[U_dsi_SQLClauses] (FormatCode,RecordSet,FromClause,WhereClaus
 
 -----------
 -- Create table U_EGLLLBC_drvTbl
--- Holds one row per Oracle Fusion GL Interface line.  Most spec fields are
--- hardcoded directly in AscDefF expressions, so this driver table only carries
--- the values that vary per row.
 -----------
 
 IF OBJECT_ID('U_EGLLLBC_drvTbl') IS NULL
 CREATE TABLE [dbo].[U_EGLLLBC_drvTbl] (
-    [drvEffectiveDate]  varchar(10)  NULL,  -- YYYY/MM/DD
-    [drvCreationDate]   varchar(10)  NULL,  -- YYYY/MM/DD (run date)
-    [drvSegment1]       varchar(10)  NULL,  -- '01' for LLBC, '02' for LLBCF
-    [drvSegment2]       varchar(32)  NULL,  -- Department (OrgLvl2Seg, Oracle dept code)
-    [drvSegment3]       varchar(32)  NULL,  -- Object (GLBaseSeg)
-    [drvSegment4]       varchar(32)  NULL,  -- Location (LocationSeg)
-    [drvDebit]          varchar(20)  NULL,  -- 2dp formatted, signed
-    [drvCredit]         varchar(20)  NULL,  -- 2dp formatted, signed
-    [drvRef1]           varchar(50)  NULL,  -- 'UKG Payroll - MMYYYY'
-    [drvRef4]           varchar(50)  NULL   -- 'UKG Payroll Journal - MMYYYY'
+    [drvEffectiveDate] varchar(10) NULL,
+    [drvCreationDate] varchar(10) NULL,
+    [drvSegment1] varchar(10) NULL,
+    [drvSegment2] varchar(32) NULL,
+    [drvSegment3] varchar(32) NULL,
+    [drvSegment4] varchar(32) NULL,
+    [drvDebit] varchar(20) NULL,
+    [drvCredit] varchar(20) NULL,
+    [drvRef1] varchar(50) NULL,
+    [drvRef4] varchar(50) NULL
 );
 
 -----------
@@ -408,12 +378,12 @@ CREATE TABLE [dbo].[U_EGLLLBC_EEList] (
 
 IF OBJECT_ID('U_EGLLLBC_File') IS NULL
 CREATE TABLE [dbo].[U_EGLLLBC_File] (
-    [RecordSet]   char(3)       NOT NULL,
-    [InitialSort] varchar(100)  NOT NULL,
-    [SubSort]     varchar(100)  NOT NULL,
-    [SubSort2]    varchar(100)  NULL,
-    [SubSort3]    varchar(100)  NULL,
-    [Data]        varchar(max)  NULL
+    [RecordSet] char(3) NOT NULL,
+    [InitialSort] varchar(100) NOT NULL,
+    [SubSort] varchar(100) NOT NULL,
+    [SubSort2] varchar(100) NULL,
+    [SubSort3] varchar(100) NULL,
+    [Data] varchar(max) NULL
 );
 GO
 CREATE PROCEDURE [dbo].[dsi_sp_BuildDriverTables_EGLLLBC]
@@ -449,6 +419,8 @@ SELECT * FROM dbo.U_dsi_Parameters    WHERE FormatCode = 'EGLLLBC';
 SELECT * FROM dbo.AscExp              WHERE expFormatCode = 'EGLLLBC';
 SELECT * FROM dbo.U_EGLLLBC_drvTbl;
 SELECT * FROM dbo.U_EGLLLBC_File;
+SELECT * FROM dbo.U_dsi_InterfaceActivityLog WHERE FormatCode = 'EGLLLBC' ORDER BY RunID DESC;
+
 
 EXEC dbo.dsi_sp_TestSwitchbox_v2 'EGLLLBC', 'EORACLEGL';
 EXEC dbo.dsi_sp_TestSwitchbox_v2 'EGLLLBC', 'TESTGL';
@@ -482,91 +454,108 @@ BEGIN
     FROM dbo.U_dsi_Parameters WITH (NOLOCK)
     WHERE FormatCode = @FormatCode;
 
+	--==========================================
+-- Build Driver Table
+--==========================================
 
-    --==========================================
-    -- Build Driver Table
-    --==========================================
-    IF OBJECT_ID('U_EGLLLBC_drvTbl','U') IS NOT NULL
-        DROP TABLE dbo.U_EGLLLBC_drvTbl;
+IF OBJECT_ID('dbo.U_EGLLLBC_drvTbl', 'U') IS NOT NULL
+    DROP TABLE dbo.U_EGLLLBC_drvTbl;
 
-    ---------------------------------
-    -- Pass 1: DEBITS  (vGLAcctType = 'D')
-    --   drvDebit  = SUM(vAllocAmt) for the segment grouping (signed, no ABS)
-    --   drvCredit = '0.00'
-    ---------------------------------
-    SELECT
-         drvEffectiveDate = CONVERT(VARCHAR(10), CAST(LEFT(vPerControl, 8) AS DATE), 111)
-        ,drvCreationDate  = @RunDate
-        ,drvSegment1      = CASE
-                                WHEN vCOID = 'LLBC'  THEN '01'
-                                WHEN vCOID = 'LLBCF' THEN '02'
-                                ELSE ''
-                            END
-        -- Segment2 (Department): currently passes OrgLvl2Seg straight through.
-        -- Replace with a CASE statement once the LLBC -> Oracle dept code map is supplied.
-        ,drvSegment2      = LTRIM(RTRIM(ISNULL(vOrgLvl2Seg, '')))
-        ,drvSegment3      = LTRIM(RTRIM(ISNULL(vGLBaseSeg, '')))
-        ,drvSegment4      = LTRIM(RTRIM(ISNULL(vLocationSeg, '')))
-        ,drvDebit         = FORMAT(SUM(vAllocAmt), '0.00')
-        ,drvCredit        = '0.00'
-        ,drvRef1          = 'UKG Payroll - '         + FORMAT(CAST(LEFT(vPerControl, 8) AS DATE), 'MMyyyy')
-        ,drvRef4          = 'UKG Payroll Journal - ' + FORMAT(CAST(LEFT(vPerControl, 8) AS DATE), 'MMyyyy')
-    INTO dbo.U_EGLLLBC_drvTbl
-    FROM dbo.vw_Dsi_TmpAlloc WITH (NOLOCK)
-    WHERE vGLBaseSeg  <> 'NOGL'
-      AND vGLAcctType =  'D'
-    GROUP BY
-         vCOID
-        ,vOrgLvl2Seg
-        ,vGLBaseSeg
-        ,vLocationSeg
-        ,vPerControl
-    HAVING SUM(vAllocAmt) <> 0
-    ;
+-- Explicit table definition (prevents varchar(4) issues)
+CREATE TABLE dbo.U_EGLLLBC_drvTbl (
+    drvEffectiveDate varchar(10),
+    drvCreationDate  varchar(10),
+    drvSegment1      varchar(2),
+    drvSegment2      varchar(15),
+    drvSegment3      varchar(50),
+    drvSegment4      varchar(15),
+    drvDebit         varchar(20),
+    drvCredit        varchar(20),
+    drvRef1          varchar(100),
+    drvRef4          varchar(100)
+);
 
-    ---------------------------------
-    -- Pass 2: CREDITS  (vGLAcctType = 'C')
-    --   drvDebit  = '0.00'
-    --   drvCredit = SUM(vAllocAmt) for the segment grouping (signed, no ABS)
-    ---------------------------------
-    INSERT INTO dbo.U_EGLLLBC_drvTbl (
-         drvEffectiveDate
-        ,drvCreationDate
-        ,drvSegment1
-        ,drvSegment2
-        ,drvSegment3
-        ,drvSegment4
-        ,drvDebit
-        ,drvCredit
-        ,drvRef1
-        ,drvRef4
-    )
-    SELECT
-         drvEffectiveDate = CONVERT(VARCHAR(10), CAST(LEFT(vPerControl, 8) AS DATE), 111)
-        ,drvCreationDate  = @RunDate
-        ,drvSegment1      = CASE
-                                WHEN vCOID = 'LLBC'  THEN '01'
-                                WHEN vCOID = 'LLBCF' THEN '02'
-                                ELSE ''
-                            END
-        ,drvSegment2      = LTRIM(RTRIM(ISNULL(vOrgLvl2Seg, '')))
-        ,drvSegment3      = LTRIM(RTRIM(ISNULL(vGLBaseSeg, '')))
-        ,drvSegment4      = LTRIM(RTRIM(ISNULL(vLocationSeg, '')))
-        ,drvDebit         = '0.00'
-        ,drvCredit        = FORMAT(SUM(vAllocAmt), '0.00')
-        ,drvRef1          = 'UKG Payroll - '         + FORMAT(CAST(LEFT(vPerControl, 8) AS DATE), 'MMyyyy')
-        ,drvRef4          = 'UKG Payroll Journal - ' + FORMAT(CAST(LEFT(vPerControl, 8) AS DATE), 'MMyyyy')
-    FROM dbo.vw_Dsi_TmpAlloc WITH (NOLOCK)
-    WHERE vGLBaseSeg  <> 'NOGL'
-      AND vGLAcctType =  'C'
-    GROUP BY
-         vCOID
-        ,vOrgLvl2Seg
-        ,vGLBaseSeg
-        ,vLocationSeg
-        ,vPerControl
-    HAVING SUM(vAllocAmt) <> 0
-    ;
+---------------------------------
+-- Pass 1: DEBITS (vGLAcctType = 'D')
+---------------------------------
+INSERT INTO dbo.U_EGLLLBC_drvTbl (
+     drvEffectiveDate
+    ,drvCreationDate
+    ,drvSegment1
+    ,drvSegment2
+    ,drvSegment3
+    ,drvSegment4
+    ,drvDebit
+    ,drvCredit
+    ,drvRef1
+    ,drvRef4
+)
+SELECT
+     CONVERT(VARCHAR(10), CAST(LEFT(vPerControl, 8) AS DATE), 111)
+    ,@RunDate
+    ,CASE 
+        WHEN vCOID = 'U8MXA'  THEN '01'
+        WHEN vCOID = '2RU2I' THEN '02'
+        ELSE ''
+     END
+    ,LTRIM(RTRIM(ISNULL(vOrglLvl3Seg, '')))
+    ,LTRIM(RTRIM(ISNULL(vGLBaseSeg, '')))
+    ,LTRIM(RTRIM(ISNULL(vLocationSeg, '')))
+    ,CONVERT(varchar(20), CAST(SUM(vAllocAmt) AS decimal(18,2)))  -- safer than FORMAT
+    ,'0.00'
+    ,'UKG Payroll - ' + CONVERT(varchar(6), CAST(LEFT(vPerControl, 8) AS DATE), 112)
+    ,'UKG Payroll Journal - ' + CONVERT(varchar(6), CAST(LEFT(vPerControl, 8) AS DATE), 112)
+FROM dbo.vw_Dsi_TmpAlloc WITH (NOLOCK)
+WHERE vGLBaseSeg  <> 'NOGL'
+  AND vGLAcctType = 'D'
+GROUP BY
+     vCOID
+    ,vOrglLvl3Seg
+    ,vGLBaseSeg
+    ,vLocationSeg
+    ,vPerControl
+HAVING SUM(vAllocAmt) <> 0;
+
+---------------------------------
+-- Pass 2: CREDITS (vGLAcctType = 'C')
+---------------------------------
+INSERT INTO dbo.U_EGLLLBC_drvTbl (
+     drvEffectiveDate
+    ,drvCreationDate
+    ,drvSegment1
+    ,drvSegment2
+    ,drvSegment3
+    ,drvSegment4
+    ,drvDebit
+    ,drvCredit
+    ,drvRef1
+    ,drvRef4
+)
+SELECT
+     CONVERT(VARCHAR(10), CAST(LEFT(vPerControl, 8) AS DATE), 111)
+    ,@RunDate
+    ,CASE 
+        WHEN vCOID = 'U8MXA'  THEN '01'
+        WHEN vCOID = '2RU2I' THEN '02'
+        ELSE ''
+     END
+    ,LTRIM(RTRIM(ISNULL(vOrglLvl3Seg, '')))
+    ,LTRIM(RTRIM(ISNULL(vGLBaseSeg, '')))
+    ,LTRIM(RTRIM(ISNULL(vLocationSeg, '')))
+    ,'0.00'
+    ,CONVERT(varchar(20), CAST(SUM(vAllocAmt) AS decimal(18,2)))  -- consistent typing
+    ,'UKG Payroll - ' + CONVERT(varchar(6), CAST(LEFT(vPerControl, 8) AS DATE), 112)
+    ,'UKG Payroll Journal - ' + CONVERT(varchar(6), CAST(LEFT(vPerControl, 8) AS DATE), 112)
+FROM dbo.vw_Dsi_TmpAlloc WITH (NOLOCK)
+WHERE vGLBaseSeg  <> 'NOGL'
+  AND vGLAcctType = 'C'
+GROUP BY
+     vCOID
+    ,vOrglLvl3Seg
+    ,vGLBaseSeg
+    ,vLocationSeg
+    ,vPerControl
+HAVING SUM(vAllocAmt) <> 0;
 
 
     --==========================================
@@ -628,7 +617,7 @@ UPDATE dbo.AscExp
 -----------
 
 EXEC dbo.dsi_sp_UpdateConfig 'EGLLLBC', 'ExportPath', 'V', NULL
-EXEC dbo.dsi_sp_UpdateConfig 'EGLLLBC', 'TestPath',   'V', NULL
+EXEC dbo.dsi_sp_UpdateConfig 'EGLLLBC', 'TestPath', 'V', NULL
 
 
 -----------
