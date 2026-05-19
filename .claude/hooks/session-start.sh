@@ -7,3 +7,6 @@ fi
 
 # Install sqlfluff for SQL linting
 pip install --quiet sqlfluff 2>&1 | tail -5
+
+# Install caveman Claude Code plugin
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
